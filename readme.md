@@ -30,6 +30,10 @@ Usage:
 
 4. You can now use `ngc` in your terminal!
 
+## TODO / Future
+
+- Backup system
+
 ## License
 
 idk, MIT License. it's a bash script bruh.

@@ -34,6 +34,8 @@ Usage:
 
 - Backup system
 
+- `ngc -r` if file doesnt exists just shows help :(
+
 ## License
 
 idk, MIT License. it's a bash script bruh.

@@ -30,6 +30,12 @@ Usage:
 
 4. You can now use `ngc` in your terminal!
 
+## Reinstall / Update
+
+`sudo rm -f /usr/local/bin/ngc && sudo nano /usr/local/bin/ngc && sudo chmod +x /usr/local/bin/ngc`
+
+> This is the command I use for reinstallation of the script, you can use it ig.
+
 ## TODO / Future
 
 - Backup system

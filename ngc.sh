@@ -11,8 +11,10 @@ show_help() {
     echo "Usage:"
     echo "  ngc <domain>       Edit or create Nginx config for domain"
     echo "  ngc run            Link all, test once, and reload Nginx"
-    echo "  ngc -r <domain>    Remove domain config and symlink"
-    echo "  ngc -l             List all domains and their status"
+    echo "  ngc rm <domain>    Remove domain config and symlink"
+    echo "  ngc list           List all domains and their status"
+    echo "  ngc listbak        List all backed up (.bak) configs"
+    echo "  ngc restore <domain> Restore a config from a .bak file"
 }
 
 edit_config() {
@@ -56,8 +58,20 @@ remove_config() {
     CONF_FILE="${SITES_AVAILABLE}/${DOMAIN}"
     LINK_FILE="${SITES_ENABLED}/${DOMAIN}"
 
-    [ -f "$CONF_FILE" ] && rm "$CONF_FILE" && echo -e "${green}Removed $CONF_FILE${reset}"
-    [ -L "$LINK_FILE" ] && rm "$LINK_FILE" && echo -e "${green}Removed symlink $LINK_FILE${reset}"
+    if [ -f "$CONF_FILE" ]; then
+        mv "$CONF_FILE" "${CONF_FILE}.bak"
+        echo -e "${green}Backed up $CONF_FILE to ${CONF_FILE}.bak${reset}"
+    else
+        echo -e "${red}Config file $CONF_FILE does not exist.${reset}"
+        exit 1
+    fi
+
+    if [ -L "$LINK_FILE" ]; then
+        rm "$LINK_FILE"
+        echo -e "${green}Removed symlink $LINK_FILE${reset}"
+    else
+        echo -e "${red}Symlink $LINK_FILE does not exist.${reset}"
+    fi
 }
 
 list_configs() {
@@ -78,16 +92,44 @@ list_configs() {
     echo -e "\nNginx service status: ${green}$nginx_status${reset}"
 }
 
+list_bak_configs() {
+    echo "Backed up Nginx configs:"
+    for CONF_FILE in "$SITES_AVAILABLE"/*.bak; do
+        DOMAIN=$(basename "$CONF_FILE" .bak)
+        echo -e "$DOMAIN: ${green}Backed up${reset}"
+    done
+}
+
+restore_config() {
+    DOMAIN="$1"
+    BAK_FILE="${SITES_AVAILABLE}/${DOMAIN}.bak"
+    CONF_FILE="${SITES_AVAILABLE}/${DOMAIN}"
+
+    if [ -f "$BAK_FILE" ]; then
+        mv "$BAK_FILE" "$CONF_FILE"
+        echo -e "${green}Restored $CONF_FILE from $BAK_FILE${reset}"
+    else
+        echo -e "${red}Backup file $BAK_FILE does not exist.${reset}"
+        exit 1
+    fi
+}
+
 # Entry point
 case "$1" in
     run)
         run_all_configs
         ;;
-    -r)
+    rm)
         [ -n "$2" ] && remove_config "$2" || show_help
         ;;
-    -l)
+    list)
         list_configs
+        ;;
+    listbak)
+        list_bak_configs
+        ;;
+    restore)
+        [ -n "$2" ] && restore_config "$2" || show_help
         ;;
     *)
         [ -n "$1" ] && edit_config "$1" || show_help

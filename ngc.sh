@@ -9,12 +9,13 @@ reset="\033[0m"
 
 show_help() {
     echo "Usage:"
-    echo "  ngc <domain>       Edit or create Nginx config for domain"
-    echo "  ngc run            Link all, test once, and reload Nginx"
-    echo "  ngc rm <domain>    Remove domain config and symlink"
-    echo "  ngc list           List all domains and their status"
-    echo "  ngc listbak        List all backed up (.bak) configs"
-    echo "  ngc restore <domain> Restore a config from a .bak file"
+    echo "  ngc <domain>          Edit or create Nginx config for domain"
+    echo "  ngc run               Link all, test once, and reload Nginx"
+    echo "  ngc rm <domain>       Remove domain config and symlink"
+    echo "  ngc list              List all domains and their status"
+    echo "  ngc listbak           List all backed up (.bak) configs"
+    echo "  ngc restore <domain>  Restore a config from a .bak file"
+    echo "  ngc ren <old> <new>   Rename a config file (both available and enabled)"
 }
 
 edit_config() {
@@ -114,6 +115,40 @@ restore_config() {
     fi
 }
 
+rename_config() {
+    OLD_DOMAIN="$1"
+    NEW_DOMAIN="$2"
+    OLD_CONF_FILE="${SITES_AVAILABLE}/${OLD_DOMAIN}"
+    NEW_CONF_FILE="${SITES_AVAILABLE}/${NEW_DOMAIN}"
+    OLD_LINK_FILE="${SITES_ENABLED}/${OLD_DOMAIN}"
+    NEW_LINK_FILE="${SITES_ENABLED}/${NEW_DOMAIN}"
+
+    if [ ! -f "$OLD_CONF_FILE" ]; then
+        echo -e "${red}Config file $OLD_CONF_FILE does not exist.${reset}"
+        exit 1
+    fi
+
+    if [ -f "$NEW_CONF_FILE" ]; then
+        echo -e "${red}Config file $NEW_CONF_FILE already exists. Aborting to avoid overwriting.${reset}"
+        exit 1
+    fi
+
+    if [ -L "$NEW_LINK_FILE" ]; then
+        echo -e "${red}Symlink $NEW_LINK_FILE already exists. Aborting to avoid overwriting.${reset}"
+        exit 1
+    fi
+
+    mv "$OLD_CONF_FILE" "$NEW_CONF_FILE"
+    echo -e "${green}Renamed $OLD_CONF_FILE to $NEW_CONF_FILE${reset}"
+
+    if [ -L "$OLD_LINK_FILE" ]; then
+        rm "$OLD_LINK_FILE"
+        echo -e "${green}Removed old symlink $OLD_LINK_FILE${reset}"
+    fi
+
+    echo -e "${green}Use 'ngc run' to ensure changes are applied.${reset}"
+}
+
 # Entry point
 case "$1" in
     run)
@@ -130,6 +165,9 @@ case "$1" in
         ;;
     restore)
         [ -n "$2" ] && restore_config "$2" || show_help
+        ;;
+    ren)
+        [ -n "$3" ] && rename_config "$2" "$3" || show_help
         ;;
     *)
         [ -n "$1" ] && edit_config "$1" || show_help

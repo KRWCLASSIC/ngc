@@ -14,12 +14,13 @@ I made this tool because as I started hosting more and more things on my domain,
 
 ```text
 Usage:
-  ngc <domain>       Edit or create Nginx config for domain
-  ngc run            Link all, test once, and reload Nginx
-  ngc rm <domain>    Remove domain config and symlink
-  ngc list           List all domains and their status
-  ngc listbak        List all backed up (.bak) configs
-  ngc restore <domain> Restore a config from a .bak file
+  ngc <domain>          Edit or create Nginx config for domain
+  ngc run               Link all, test once, and reload Nginx
+  ngc rm <domain>       Remove domain config and symlink
+  ngc list              List all domains and their status
+  ngc listbak           List all backed up (.bak) configs
+  ngc restore <domain>  Restore a config from a .bak file
+  ngc ren <old> <new>   Rename a config file (both available and enabled)
 ```
 
 ## Instalation

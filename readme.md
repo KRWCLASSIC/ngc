@@ -40,9 +40,7 @@ Usage:
 
 ## TODO / Future
 
-- Backup system
-
-- `ngc -r` if file doesnt exists just shows help :(
+- None
 
 ## License
 
